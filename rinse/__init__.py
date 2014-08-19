@@ -26,15 +26,12 @@ class SoapMessage(object):
     """SOAP message."""
 
     def __init__(self, body=None, headers=None, nsmap=None, body_schema=None):
+        """Set base attributes."""
         self.body = body
         self.headers = headers or []
         self.nsmap = nsmap or {}
         self.body_schema = body_schema
         self._ns = {}
-
-        # create default namespaces
-        self.soapenv = self.namespace('soapenv')
-        self.wsa = self.namespace('wsa')
 
     def namespace(self, prefix, url=None):
         """Add namespace with specified prefix."""
@@ -42,11 +39,11 @@ class SoapMessage(object):
             if url is None:
                 url = NS_MAP[prefix]
             self.nsmap[prefix] = url
-            self._ns[prefix] = ElementMaker(namespace=url, nsmap={prefix: url})
+            self._ns[prefix] = ElementMaker(namespace=url, nsmap=self.nsmap)
         return self._ns[prefix]
 
     def append_auth_headers(self, username, password):
-        """Add WSSE security headers."""
+        """Add WSSE (security) headers."""
         # add WSSE headers
         wsse = self.namespace('wsse')
         self.headers.append(
@@ -58,49 +55,34 @@ class SoapMessage(object):
             ),
         )
 
-    def to_etree(self):
-        """Generate a SOAP Envelope message with header and body elements."""
-        headers = []
-        NS = ElementMakerCache(self.nsmap)
-        WSSE = NS['wsse']
-        SOAPENV = NS['soapenv']
-        WSA = NS['wsa']
-
-        # insert WSSE security header
-        try:
-            headers.append(
-                WSSE.Security(
-                    WSSE.UsernameToken(
-                        WSSE.Username(kwargs['wsse_user']),
-                        WSSE.Password(kwargs['wsse_pass']),
-                    ),
-                )
-            )
-        except KeyError:
-            pass  # either wsse_user or wsse_pass not given
-
-        # insert WSA addressing headers
-        headers.extend(
+    def append_wsa_headers(
+            self, to, action, message_id=None,
+            reply_to='http://www.w3.org/2005/08/addressing/anonymous',
+    ):
+        """Add WSA (addressing) headers."""
+        wsa = self.namespace('wsa')
+        self.headers.extend(
             [
-                WSA.ReplyTo(
-                    WSA.Address(
-                        'http://www.w3.org/2005/08/addressing/anonymous'
-                    ),
+                wsa.ReplyTo(
+                    wsa.Address(reply_to),
                 ),
-                WSA.Action(action),
-                WSA.MessageID(message_id),
-                WSA.To(to),
+                wsa.Action(action),
+                wsa.MessageID(message_id),
+                wsa.To(to),
             ]
         )
 
-        return SOAPENV.Envelope(
-            SOAPENV.Header(*headers),
-            SOAPENV.Body(body),
+    def etree(self):
+        """Generate a SOAP Envelope message with header and body elements."""
+        soapenv = self.namespace('soapenv')
+        return soapenv.Envelope(
+            soapenv.Header(*self.headers),
+            soapenv.Body(self.body),
         )
 
-
-    @classmethod
-    def fromxml(cls, xml, **kwargs):
+    def xml(self, **kwargs):
+        """Generate XML representation of self."""
+        return etree.tostring(self.etree(), **kwargs)
 
 
 Response = collections.namedtuple('Response', ['msg', 'body', 'parsed'])
@@ -166,7 +148,7 @@ def printxml(doc):
         break_on_hyphens=False,
     )
     for line in etree.tostring(
-        doc, pretty_print=True, encoding='unicode',
+            doc, pretty_print=True, encoding='unicode',
     ).split('\n'):
         print(wrapper.fill(line.rstrip('\n')).rstrip('\n'))
 
@@ -289,6 +271,7 @@ class SoapOperation(object):
         return body
 
     def __call__(self, *args, **kwargs):
+        """Make SOAP RPC call."""
         body = self.build_body(*args, **kwargs)
         response = soapcall(
             self.client.url,
@@ -301,7 +284,7 @@ class SoapOperation(object):
         return self.parse_response(response)
 
     def parse_response(self, msg):
-        # validate msg against SOAP schema
+        """Validate msg against SOAP schema."""
         self.client.soap_schema.assertValid(msg)
         # extract the soapenv:Body
         body = msg.xpath(
@@ -320,6 +303,7 @@ class SoapClient(object):
     """Rinse SOAP client."""
 
     def __init__(self, url, nsmap, **kwargs):
+        """Set base attributes."""
         self.url = url
         self.nsmap = NS_MAP.copy()
         self.nsmap.update(nsmap)
@@ -328,8 +312,9 @@ class SoapClient(object):
         self.soap_schema = SCHEMA[ENVELOPE_XSD]
 
     def make_operation(self, action, *args, **kwargs):
+        """Generate a SoapOperation instance for this client."""
         if action not in self.operations:
             kwargs.setdefault('debug', self.kwargs.get('debug', False))
-            return SoapOperation(self, action, *args, **kwargs)
+            operation = SoapOperation(self, action, *args, **kwargs)
             self.operations[action] = operation
         return self.operations[action]
