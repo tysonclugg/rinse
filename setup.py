@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='rinse',
-    version='0.0.2',
+    version='0.0.3',
     description='Python3 SOAP client built with lxml and requests.',
     author='Tyson Clugg',
     author_email='tyson@clugg.net',
