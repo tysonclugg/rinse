@@ -1,10 +1,9 @@
-# vim: set fileencoding=utf8 :
 """SOAP client."""
-import abc
+from __future__ import print_function
 import collections
 import os.path
+import pprint
 import textwrap
-import uuid
 
 import defusedxml.lxml
 from lxml.builder import ElementMaker
@@ -13,79 +12,149 @@ import requests
 
 RINSE_DIR = os.path.dirname(__file__)
 ENVELOPE_XSD = 'soap-1.1_envelope.xsd'
+
+NS_SOAPENV = 'http://schemas.xmlsoap.org/soap/envelope/'
+
 NS_MAP = {
-    'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/',
-    'wsa': 'http://www.w3.org/2005/08/addressing',
-    'wsse': 'http://docs.oasis-open.org/wss/2004/01/'
-            'oasis-200401-wss-wssecurity-secext-1.0.xsd',
+    'soapenv': NS_SOAPENV,
 }
+
+
+def element_as_tree(element):
+    """Convert an element from within an ElementTree to its own tree."""
+    # XXX: this is a crude hack, but it works - got any better ideas?
+    return safe_parse_string(
+        etree.tostring(
+            etree.ElementTree(element),
+        ),
+    )
+
+
+def safe_parse_string(raw_xml, **kwargs):
+    """Safely parse raw XML content into an element tree."""
+    try:
+        return defusedxml.lxml.fromstring(raw_xml, **kwargs)
+    except:
+        print(raw_xml)
+        raise
+
+
+def safe_parse_path(xml_path, **kwargs):
+    """Safely parse XML content from path into an element tree."""
+    return defusedxml.lxml.parse(xml_path, **kwargs)
 
 
 class SoapMessage(object):
 
-    """SOAP message."""
+    """SOAP message.
 
-    def __init__(self, body=None, headers=None, nsmap=None, body_schema=None):
+    >>> body = etree.Element('test')
+    >>> msg = SoapMessage(body)
+    >>> printxml(msg.etree())
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+      <soapenv:Header/>
+      <soapenv:Body>
+        <test/>
+      </soapenv:Body>
+    </soapenv:Envelope>
+    """
+
+    elementmaker_cls = ElementMaker
+
+    def __init__(self, body=None):
         """Set base attributes."""
+        # XML namespace map
+        self._nsmap = {}
+        # cache of lxml.etree.ElementMaker instances by namespace prefix
+        self._elementmaker_cache = {}
+        # SOAP headers
+        self.headers = []
+        # SOAP body
         self.body = body
-        self.headers = headers or []
-        self.nsmap = nsmap or {}
-        self.body_schema = body_schema
-        self._ns = {}
+        # HTTP headers
+        self.http_headers = {
+            'Content-Type': 'text/xml;charset=UTF-8',
+        }
 
-    def namespace(self, prefix, url=None):
-        """Add namespace with specified prefix."""
-        if prefix not in self._ns:
-            if url is None:
-                url = NS_MAP[prefix]
-            self.nsmap[prefix] = url
-            self._ns[prefix] = ElementMaker(namespace=url, nsmap=self.nsmap)
-        return self._ns[prefix]
+    def __getitem__(self, key):
+        """Dict style access to http_headers."""
+        return self.http_headers[key]
 
-    def append_auth_headers(self, username, password):
-        """Add WSSE (security) headers."""
-        # add WSSE headers
-        wsse = self.namespace('wsse')
-        self.headers.append(
-            wsse.Security(
-                wsse.UsernameToken(
-                    wsse.Username(username),
-                    wsse.Password(password),
-                ),
-            ),
-        )
+    def __setitem__(self, key, val):
+        """Dict style access to http_headers."""
+        self.http_headers[key] = val
 
-    def append_wsa_headers(
-            self, to, action, message_id=None,
-            reply_to='http://www.w3.org/2005/08/addressing/anonymous',
-    ):
-        """Add WSA (addressing) headers."""
-        wsa = self.namespace('wsa')
-        self.headers.extend(
-            [
-                wsa.ReplyTo(
-                    wsa.Address(reply_to),
-                ),
-                wsa.Action(action),
-                wsa.MessageID(message_id),
-                wsa.To(to),
-            ]
-        )
+    def __delitem__(self, key):
+        """Dict style access to http_headers."""
+        del self.http_headers[key]
+
+    def elementmaker(self, prefix, url):
+        """Register namespace and return ElementMaker bound to the namespace."""
+        try:
+            old_url = self._nsmap[prefix]
+            if url != old_url:
+                raise ValueError(
+                    'Namespace {!r} already defined as {!r}.'.format(
+                        prefix,
+                        old_url,
+                    ),
+                )
+        except KeyError:
+            self._nsmap[prefix] = url
+            self._elementmaker_cache[prefix] = self.elementmaker_cls(
+                namespace=url, nsmap=self._nsmap,
+            )
+        return self._elementmaker_cache[prefix]
 
     def etree(self):
         """Generate a SOAP Envelope message with header and body elements."""
-        soapenv = self.namespace('soapenv')
+        soapenv = self.elementmaker('soapenv', NS_SOAPENV)
         return soapenv.Envelope(
             soapenv.Header(*self.headers),
             soapenv.Body(self.body),
         )
 
-    def xml(self, **kwargs):
+    def tostring(self, **kwargs):
         """Generate XML representation of self."""
         return etree.tostring(self.etree(), **kwargs)
 
+    def request(self, url=None):
+        """Genereate a requests.Request instance."""
+        return requests.Request(
+            'POST',
+            url or self.url,
+            data=self.tostring(pretty_print=True, encoding='utf-8'),
+            headers=self.http_headers,
+        )
 
-Response = collections.namedtuple('Response', ['msg', 'body', 'parsed'])
+    def __bytes__(self):
+        """Generate XML (bytes)."""
+        return self.tostring()
+
+    def __str__(self):
+        """Generate XML (unicode)."""
+        return self.tostring(encoding='unicode')
+
+
+class Response(object):
+
+    """Rinse Response object."""
+
+    def __init__(self, response):
+        """Response init."""
+        self._response = response
+        # parse response
+        self._doc = safe_parse_string(response.content)
+        self._body = self._doc.xpath(
+            '/soapenv:Envelope/soapenv:Body', namespaces=NS_MAP,
+        )[0]
+
+    def __str__(self):
+        """String representation of Response is the HTTP body content."""
+        return self._response.content.decode('utf-8')
+
+
+RinseResponse = collections.namedtuple('RinseResponse', ['response', 'doc'])
 
 
 class SchemaCache(collections.defaultdict):
@@ -101,7 +170,7 @@ class SchemaCache(collections.defaultdict):
         else:
             # assume XSD is in res/ subdir of rinse project.
             xsd = os.path.join(RINSE_DIR, 'res', xsd)
-        doc = defusedxml.lxml.parse(xsd)
+        doc = safe_parse_path(xsd)
         if xpath:
             doc = doc.xpath(xpath, namespaces=namespaces)[0]
         self[xsd] = schema = etree.XMLSchema(doc)
@@ -136,21 +205,40 @@ class ElementMakerCache(collections.defaultdict):
         )
 
 
+PRETTY_PARSER = etree.XMLParser(
+    remove_blank_text=True,
+)
+PRETTY_TEXT_WRAPPER = textwrap.TextWrapper(
+    width=78,
+    initial_indent='',
+    subsequent_indent='        ',
+    replace_whitespace=False,
+    drop_whitespace=False,
+    break_long_words=False,
+    break_on_hyphens=False,
+)
+
+
 def printxml(doc):
-    """Pretty print an lxml document tree."""
-    wrapper = textwrap.TextWrapper(
-        width=78,
-        initial_indent='',
-        subsequent_indent='        ',
-        replace_whitespace=False,
-        drop_whitespace=False,
-        break_long_words=False,
-        break_on_hyphens=False,
+    """Pretty print an lxml document tree.
+
+    The XML printed may not be exactly equivalent to the doc provided, as blank
+    text within elements will be stripped to allow etree.tostring() to work with
+    the 'pretty_print' option set.
+    """
+    pretty_tree = safe_parse_string(
+        etree.tostring(doc), parser=PRETTY_PARSER,
     )
-    for line in etree.tostring(
-            doc, pretty_print=True, encoding='unicode',
-    ).split('\n'):
-        print(wrapper.fill(line.rstrip('\n')).rstrip('\n'))
+    pretty_xml = etree.tostring(
+        pretty_tree, pretty_print=True, encoding='unicode',
+    ).replace('\t', '        ').rstrip('\n')
+
+    for line in pretty_xml.split('\n'):
+        line = PRETTY_TEXT_WRAPPER.fill(line.rstrip('\n')).rstrip('\n')
+        for subline in line.split('\n'):
+            if not subline.strip():
+                continue
+            print(subline)
 
 
 def recursive_dict(element):
@@ -162,9 +250,9 @@ def recursive_dict(element):
             in element
         )
     return (
-        (
+        '{}{}'.format(
             element.tag,
-            tuple(element.attrib.items()),
+            pprint.pformat(element.attrib, compact=True, width=10000),
         ),
         dict(
             map(recursive_dict, element)
@@ -172,149 +260,42 @@ def recursive_dict(element):
     )
 
 
-def new_maker(namespaces, nsmap=None):
-    """Generate a new ElementMaker with nsmap generated from aliases."""
-    if nsmap is None:
-        nsmap = {}
-    return ElementMaker(
-        nsmap={
-            name: nsmap.get(name, None) or NS_MAP[name]
-            for name in list(namespaces) + NS_MAP.keys()
-        },
-    )
-
-
-def soapmsg(to, action, message_id, body, nsmap=None, **kwargs):
-    """Generate a SOAP Envelope message with header and body elements."""
-    if not nsmap:
-        nsmap = {}
-    headers = []
-    NS = ElementMakerCache(nsmap)
-    WSSE = NS['wsse']
-    SOAPENV = NS['soapenv']
-    WSA = NS['wsa']
-
-    # insert WSSE security header
-    try:
-        headers.append(
-            WSSE.Security(
-                WSSE.UsernameToken(
-                    WSSE.Username(kwargs['wsse_user']),
-                    WSSE.Password(kwargs['wsse_pass']),
-                ),
-            )
-        )
-    except KeyError:
-        pass  # either wsse_user or wsse_pass not given
-
-    # insert WSA addressing headers
-    headers.extend([
-        WSA.ReplyTo(
-            WSA.Address('http://www.w3.org/2005/08/addressing/anonymous'),
-        ),
-        WSA.Action(action),
-        WSA.MessageID(message_id),
-        WSA.To(to),
-    ])
-
-    return SOAPENV.Envelope(
-        SOAPENV.Header(*headers),
-        SOAPENV.Body(body),
-    )
-
-
-def soapcall(url, action, message_id, body, nsmap=None, **kwargs):
-    """Call a SOAP operation."""
-    msg = soapmsg(
-        url, action, message_id, body,
-        nsmap=nsmap, **kwargs
-    )
-    if kwargs.get('debug', False):
-        printxml(msg)
-    session = requests.Session()
-    resp = session.post(
-        url,
-        data=etree.tostring(msg, pretty_print=True),
-        headers={
-            'Content-Type': 'text/xml;charset=UTF-8',
-            'SOAPAction': '"{}"'.format(action),
-        },
-    )
-    root = defusedxml.lxml.fromstring(resp.content)
-    # return root.xpath('/soapenv:Envelope/soapenv:Body', namespaces=NS_MAP)[0]
-    return root
-
-
-class SoapOperation(object):
-
-    """Rinse SOAP operation proxy."""
-
-    __metaclass__ = abc.ABCMeta
-
-    def __init__(self, client, action, body_callback=None,
-                 response_callback=None, debug=False, body_schema=None,
-                 response_schema=None):
-        """Stash required attributes to generate a valid SOAP call later on."""
-        self.client = client
-        self.action = action
-        self.debug = debug
-        self.body_callback = body_callback
-        self.response_callback = response_callback
-        self.body_schema = body_schema
-        self.response_schema = response_schema
-
-    def build_body(self, *args, **kwargs):
-        """Transform args into an lxml.etree doc."""
-        body = self.body_callback(*args, **kwargs)
-        if self.body_schema:
-            self.body_schema.assertValid(body)
-        return body
-
-    def __call__(self, *args, **kwargs):
-        """Make SOAP RPC call."""
-        body = self.build_body(*args, **kwargs)
-        response = soapcall(
-            self.client.url,
-            self.action,
-            'uuid:{}'.format(uuid.uuid4()),
-            body,
-            self.client.nsmap,
-            **self.client.kwargs
-        )
-        return self.parse_response(response)
-
-    def parse_response(self, msg):
-        """Validate msg against SOAP schema."""
-        self.client.soap_schema.assertValid(msg)
-        # extract the soapenv:Body
-        body = msg.xpath(
-            '/soapenv:Envelope/soapenv:Body',
-            namespaces=self.client.nsmap,
-        )[0]
-        # validate the body if we know the response schema
-        if self.response_schema:
-            self.response_schema.assertValid(body)
-        parsed = self.response_callback(msg, body)
-        return Response(msg, body, parsed)
-
-
 class SoapClient(object):
 
     """Rinse SOAP client."""
 
-    def __init__(self, url, nsmap, **kwargs):
+    __session = None
+
+    def __init__(self, url, debug=False, **kwargs):
         """Set base attributes."""
         self.url = url
-        self.nsmap = NS_MAP.copy()
-        self.nsmap.update(nsmap)
+        self.debug = debug
         self.kwargs = kwargs
         self.operations = {}
         self.soap_schema = SCHEMA[ENVELOPE_XSD]
 
-    def make_operation(self, action, *args, **kwargs):
-        """Generate a SoapOperation instance for this client."""
-        if action not in self.operations:
-            kwargs.setdefault('debug', self.kwargs.get('debug', False))
-            operation = SoapOperation(self, action, *args, **kwargs)
-            self.operations[action] = operation
-        return self.operations[action]
+    @property
+    def _session(self):
+        """Cached instance of requests.Session."""
+        if self.__session is None:
+            self.__session = requests.Session()
+        return self.__session
+
+    def __call__(self, msg, build_response=RinseResponse, debug=False):
+        """Post 'msg' to remote service."""
+        # generate HTTP request from msg
+        request = msg.request(self.url).prepare()
+        if debug or self.debug:
+            print('{} {}'.format(request.method, self.url))
+            print(
+                ''.join(
+                    '{}: {}\n'.format(name, val)
+                    for name, val
+                    in sorted(request.headers.items())
+                )
+            )
+            print(request.content)
+
+        # perform HTTP(s) POST
+        resp = self._session.send(request)
+        return build_response(resp)
