@@ -1,7 +1,16 @@
 rinse
 =====
 
-Rinse_ is a Python3 SOAP client using lxml_, requests_ and defusedxml_.
+Rinse_ is a Python SOAP client using lxml_, requests_ and defusedxml_.
+
+.. image:: https://travis-ci.org/tysonclugg/rinse.svg?branch=master
+    :target: https://travis-ci.org/tysonclugg/rinse
+    :alt: Build Status
+    :align: right
+
+Rinse_ works with both Python 2 and Python 3.  Continuous integration 
+testing is performed against the latest python 2.7 and python 3.3 
+releases.
 
 The name "rinse" refers to its dictionary meaning, such as the act of 
 removing soap suds from something using water.
@@ -32,7 +41,7 @@ Future development may provide support for generating bindings from WSDL
 in the form of Python source files.  Dynamic (runtime) binding is 
 unlikely to be supported.
 
-.. _Rinse: https://github.com/tysonclugg/rinse
+.. _Rinse: https://rinse.readthedocs.org/en/latest/
 .. _requests: http://docs.python-requests.org/en/latest/
 .. _lxml: http://lxml.de/
 .. _defusedxml: https://pypi.python.org/pypi/defusedxml

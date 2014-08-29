@@ -24,11 +24,6 @@ Links:
 The latest documentation is available online at 
 https://rinse.readthedocs.org/.
 
-.. image:: https://travis-ci.org/tysonclugg/rinse.svg?branch=master
-    :target: https://travis-ci.org/tysonclugg/rinse
-    :alt: Build Status
-    :align: right
-
 Source code is available online at https://github.com/tysonclugg/rinse.
 
 You can contribute to this project on the `rinse GitHub`_ page.
@@ -54,5 +49,5 @@ License
 =======
 .. include:: ../LICENSE
 
-.. _rinse GitHub: https://github.com/tysonclugg/rinse
+.. _rinse GitHub: https://rinse.readthedocs.org/en/latest/
 .. _pypi: https://pypi.python.org/pypi/rinse

@@ -3,12 +3,12 @@ from setuptools import setup
 
 setup(
     name='rinse',
-    version='0.1.3',
+    version='0.1.4',
     description='Python3 SOAP client built with lxml and requests.',
     long_description=open('README.rst').read(),
     author='Tyson Clugg',
     author_email='tyson@clugg.net',
-    url='http://github.com/tysonclugg/rinse',
+    url='https://rinse.readthedocs.org/en/latest/',
     license='MIT',
     packages=['rinse'],
     test_suite='rinse.tests',
