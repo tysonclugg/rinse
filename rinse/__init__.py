@@ -18,6 +18,6 @@ try:
         # not installed, but there is another version that *is*
         raise DistributionNotFound
 except DistributionNotFound:
-    __version__ = 'Please install this project with setup.py'
+    __version__ = 'development'
 else:
     __version__ = _dist.version

@@ -3,8 +3,8 @@ from setuptools import setup
 
 setup(
     name='rinse',
-    version='0.1.4',
-    description='Python3 SOAP client built with lxml and requests.',
+    version='0.2.0',
+    description='SOAP client built with lxml and requests.',
     long_description=open('README.rst').read(),
     author='Tyson Clugg',
     author_email='tyson@clugg.net',
@@ -18,9 +18,13 @@ setup(
         'requests',
     ],
     classifiers=[
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
-        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
+        "Topic :: Communications",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Text Processing :: Markup :: XML",
     ],
 )
