@@ -1,1 +1,9 @@
+include LICENSE
+include Makefile
 include *.rst
+include docs/*.rst
+include docs/conf.py
+include docs/make.bat
+include docs/Makefile
+include docs/_static/*
+include docs/_templates/*
