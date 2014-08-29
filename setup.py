@@ -18,6 +18,7 @@ setup(
         'requests',
     ],
     classifiers=[
+        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
