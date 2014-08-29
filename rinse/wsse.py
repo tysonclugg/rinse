@@ -7,6 +7,7 @@ NS_WSSE = 'http://docs.oasis-open.org/wss/2004/01/' \
 def append_wsse_headers(msg, username, password):
     """Add WSSE (security) headers.
 
+    >>> from rinse.wsse import append_wsse_headers
     >>> import lxml.usedoctest
     >>> from rinse.message import SoapMessage
     >>> from rinse.util import printxml

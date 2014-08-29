@@ -10,6 +10,8 @@ class SoapMessage(object):
 
     """SOAP message.
 
+    >>> from rinse.message import SoapMessage
+    >>> from lxml import etree
     >>> from rinse.util import printxml
     >>> body = etree.Element('test')
     >>> msg = SoapMessage(body)

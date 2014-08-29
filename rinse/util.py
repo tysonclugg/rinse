@@ -1,4 +1,4 @@
-"""SOAP client."""
+"""rinse SOAP client utility functions."""
 from __future__ import print_function
 import collections
 import os.path

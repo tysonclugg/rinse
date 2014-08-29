@@ -1,9 +1,10 @@
 rinse
 =====
-Rinse is a Python3 SOAP client using lxml, requests and defusedxml.
-
 .. image:: https://travis-ci.org/tysonclugg/rinse.svg?branch=master
     :target: https://travis-ci.org/tysonclugg/rinse
+    :align: right
+
+Rinse is a Python3 SOAP client using lxml, requests and defusedxml.
 
 The name "rinse" refers to its dictionary meaning, such as the act of removing
 soap suds from something using water.

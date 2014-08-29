@@ -18,6 +18,7 @@ def append_wsa_headers(
 ):
     """Add WSA (addressing) headers.
 
+    >>> from rinse.wsa import append_wsa_headers
     >>> import lxml.usedoctest
     >>> from rinse.message import SoapMessage
     >>> from rinse.util import printxml

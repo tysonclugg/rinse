@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='rinse',
-    version='0.1.1',
+    version='0.1.2',
     description='Python3 SOAP client built with lxml and requests.',
     long_description=open('README.rst').read(),
     author='Tyson Clugg',

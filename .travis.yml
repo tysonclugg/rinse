@@ -1,8 +1,11 @@
 language: python
 python:
-         - "3.3"
-         - "2.7"
+- '3.3'
+- '2.7'
 install:
-        - pip install -r requirements.txt
+- pip install -r requirements.txt
 script:
-        - python setup.py test
+- python setup.py test
+notifications:
+  flowdock:
+    secure: NLWhZq2aD3ewRciEzJVcIeWKKaBt34loZqWITiI+XA3vyUkyW7BSo46ssZMPEfepdCu4ASiXJOwdMy0IummtW3WMSVjIpZ9OUUJX20inR0yk1YxaQ2kZdDGuFe/aSP3usFX3Bz6o1ufme3LwLQXhrKt79uI6r2JOz4VnK4nZE3k=
