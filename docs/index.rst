@@ -5,6 +5,34 @@
 
 .. include:: ../README.rst
 
+Installation:
+-------------
+Rinse_ is available for installation direct from PyPi_:
+
+.. code:: bash
+
+        pip install rinse
+
+Links:
+------
+
+.. image:: https://readthedocs.org/projects/rinse/badge/?version=latest
+    :target: https://readthedocs.org/projects/rinse/?badge=latest
+    :alt: Documentation Status
+    :align: right
+
+The latest documentation is available online at 
+https://rinse.readthedocs.org/.
+
+.. image:: https://travis-ci.org/tysonclugg/rinse.svg?branch=master
+    :target: https://travis-ci.org/tysonclugg/rinse
+    :alt: Build Status
+    :align: right
+
+Source code is available online at https://github.com/tysonclugg/rinse.
+
+You can contribute to this project on the `rinse GitHub`_ page.
+
 Contents:
 ---------
 
@@ -22,3 +50,9 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+License
+=======
+.. include:: ../LICENSE
+
+.. _rinse GitHub: https://github.com/tysonclugg/rinse
+.. _pypi: https://pypi.python.org/pypi/rinse
