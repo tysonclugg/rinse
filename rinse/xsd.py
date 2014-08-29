@@ -1,6 +1,6 @@
 """Rinse SOAP library: XML Schema Definition (XSD) functions."""
 from lxml import etree
-import rinse
+from rinse.util import element_as_tree
 
 NS_XSD = 'http://www.w3.org/2001/XMLSchema'
 NS = {
@@ -16,7 +16,7 @@ class XSDValidator(object):
 
     def __init__(self, schema_root):
         """XSDValidator init."""
-        self.root = rinse.element_as_tree(schema_root)
+        self.root = element_as_tree(schema_root)
         self.schema = etree.XMLSchema(self.root)
 
     def validate(self, doc):

@@ -19,7 +19,8 @@ def append_wsa_headers(
     """Add WSA (addressing) headers.
 
     >>> import lxml.usedoctest
-    >>> from rinse import SoapMessage, printxml
+    >>> from rinse.message import SoapMessage
+    >>> from rinse.util import printxml
     >>> msg = SoapMessage()
     >>> f123 = msg.elementmaker(
     ...     'f123',

@@ -8,7 +8,8 @@ def append_wsse_headers(msg, username, password):
     """Add WSSE (security) headers.
 
     >>> import lxml.usedoctest
-    >>> from rinse import SoapMessage, printxml
+    >>> from rinse.message import SoapMessage
+    >>> from rinse.util import printxml
     >>> msg = SoapMessage()
     >>> f123 = msg.elementmaker(
     ...     'f123',
