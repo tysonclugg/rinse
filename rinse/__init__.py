@@ -6,7 +6,7 @@ import pprint
 import textwrap
 
 import defusedxml.lxml
-from lxml.builder import ElementMaker
+import lxml.builder
 from lxml import etree
 import requests
 
@@ -32,16 +32,38 @@ def element_as_tree(element):
 
 def safe_parse_string(raw_xml, **kwargs):
     """Safely parse raw XML content into an element tree."""
-    try:
-        return defusedxml.lxml.fromstring(raw_xml, **kwargs)
-    except:
-        print(raw_xml)
-        raise
+    return defusedxml.lxml.fromstring(raw_xml, **kwargs)
 
 
 def safe_parse_path(xml_path, **kwargs):
     """Safely parse XML content from path into an element tree."""
     return defusedxml.lxml.parse(xml_path, **kwargs)
+
+
+def safe_parse_url(xml_url, **kwargs):
+    """Safely parse XML content from path into an element tree."""
+    return defusedxml.lxml.parse(xml_url, **kwargs)
+
+
+class ElementMaker(lxml.builder.ElementMaker):
+
+    """Wrapper around lxml ElementMaker that casts ints as strings."""
+
+    def __getattr__(self, name):
+        """Return a lambda that parses int args as strings."""
+        _cls = super(ElementMaker, self).__getattr__(name)
+
+        def __cls_wraper(*args, **kwargs):
+            """Wrapper around Element class."""
+            return _cls(
+                *[
+                    str(arg) if isinstance(arg, int) else arg
+                    for arg
+                    in args
+                ],
+                **kwargs
+            )
+        return __cls_wraper
 
 
 class SoapMessage(object):

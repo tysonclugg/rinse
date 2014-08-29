@@ -22,6 +22,11 @@ class WSDL(object):
         """Make a WSDL instance from a file path."""
         return cls(rinse.safe_parse_path(wsdl_path))
 
+    @classmethod
+    def from_url(cls, wsdl_path):
+        """Make a WSDL instance from a URL."""
+        return cls(rinse.safe_parse_url(wsdl_path))
+
     def __init__(self, wsdl_root):
         """WSDL init."""
         self.root = wsdl_root
