@@ -1,6 +1,5 @@
 rinse
 =====
-
 Rinse is a Python3 SOAP client using lxml, requests and defusedxml.
 
 The name "rinse" refers to its dictionary meaning, such as the act of removing
@@ -9,11 +8,12 @@ soap suds from something using water.
 The goal of rinse is to be a SOAP client that focuses on the minimum set of
 features required to make SOAP calls to services over HTTP/HTTPS.  Support for
 common SOAP extensions including WSA (WS-Addressing) and WSSE (WS-Security) is
-provided.  Rinse supports the WS-I Basic Profile Version 2.0 specification _in
-principle_, but takes a pragmatic approach to achieving compliance based upon
-further goals and constraints outlined below.
+provided.  Rinse supports the WS-I Basic Profile Version 2.0 specification *in
+principle*, but takes a pragmatic approach to achieving compliance based 
+upon further goals and constraints outlined below.
 
-Using rinse as part of a SOAP service (SOAP server) is _not supported_.  We
+Using rinse as part of a SOAP service (SOAP server) is *not supported*.  
+We
 recommend servers should use JSON for data interchange over RESTful HTTP(S)
 rather than providing SOAP services.  And we're not the only ones - Google
 announced its plans to abandon SOAP way back in 2009.
