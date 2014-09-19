@@ -43,7 +43,7 @@ class WSDL(object):
 
     @property
     def xsd_validator(self):
-        """Extract XML Schema Definision (XSD) element tree."""
+        """Extract XML Schema Definition (XSD) element tree."""
         if self._xsd_validator is None:
             self._xsd_validator = XSDValidator(self.schema)
         return self._xsd_validator
