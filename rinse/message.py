@@ -83,13 +83,16 @@ class SoapMessage(object):
         """Generate XML representation of self."""
         return etree.tostring(self.etree(), **kwargs)
 
-    def request(self, url=None):
-        """Genereate a requests.Request instance."""
+    def request(self, url=None, action=None):
+        """Generate a requests.Request instance."""
+        headers = self.http_headers.copy()
+        if action is not None:
+            headers['SOAPAction'] = action
         return requests.Request(
             'POST',
             url or self.url,
             data=self.tostring(pretty_print=True, encoding='utf-8'),
-            headers=self.http_headers,
+            headers=headers
         )
 
     def __bytes__(self):

@@ -27,10 +27,11 @@ class SoapClient(object):
             self.__session = requests.Session()
         return self.__session
 
-    def __call__(self, msg, build_response=RinseResponse, debug=False):
+    def __call__(self, msg, action="", build_response=RinseResponse,
+            debug=False):
         """Post 'msg' to remote service."""
         # generate HTTP request from msg
-        request = msg.request(self.url).prepare()
+        request = msg.request(self.url, action).prepare()
         if debug or self.debug:
             print('{} {}'.format(request.method, self.url))
             print(
