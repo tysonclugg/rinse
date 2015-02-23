@@ -92,7 +92,7 @@ class SoapMessage(object):
             'POST',
             url or self.url,
             data=self.tostring(pretty_print=True, encoding='utf-8'),
-            headers=headers
+            headers=headers,
         )
 
     def __bytes__(self):
