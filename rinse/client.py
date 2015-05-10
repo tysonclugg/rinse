@@ -27,6 +27,11 @@ class SoapClient(object):
             self.__session = requests.Session()
         return self.__session
 
+    @_session.setter
+    def _session(self, session):
+        """Allow injecting your own instance of requests.Session."""
+        self.__session = session
+
     def __call__(self, msg, build_response=RinseResponse, debug=False):
         """Post 'msg' to remote service."""
         # generate HTTP request from msg
