@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='rinse',
-    version='0.2.0',
+    version='0.3.0',
     description='SOAP client built with lxml and requests.',
     long_description=open('README.rst').read(),
     author='Tyson Clugg',
@@ -21,8 +21,9 @@ setup(
     tests_require=['mock'],
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "License :: OSI Approved :: MIT License",
         "Topic :: Communications",
         "Topic :: Internet :: WWW/HTTP",
