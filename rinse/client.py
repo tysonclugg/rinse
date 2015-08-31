@@ -33,7 +33,7 @@ class SoapClient(object):
         self.__session = session
 
     def __call__(self, msg, action="", build_response=RinseResponse,
-            debug=False):
+                 debug=False):
         """Post 'msg' to remote service."""
         # generate HTTP request from msg
         request = msg.request(self.url, action).prepare()
