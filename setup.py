@@ -11,6 +11,7 @@ setup(
     url='https://rinse.readthedocs.org/en/latest/',
     license='MIT',
     packages=['rinse'],
+    zip_safe=False,
     test_suite='rinse.tests',
     install_requires=[
         'defusedxml',
