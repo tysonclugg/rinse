@@ -3,16 +3,24 @@ rinse
 
 Rinse_ is a Python SOAP client using lxml_, requests_ and defusedxml_.
 
+.. image:: https://img.shields.io/pypi/v/rinse.svg
+    :target: https://pypi.python.org/pypi/rinse/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/pyversions/rinse.svg
+    :target: https://pypi.python.org/pypi/rinse/
+    :alt: Latest Version
+
 .. image:: https://readthedocs.org/projects/rinse/badge/?version=latest
     :target: https://rinse.readthedocs.org/
     :alt: Documentation
 
-.. image:: https://travis-ci.org/tysonclugg/rinse.svg?branch=master
+.. image:: https://img.shields.io/travis/tysonclugg/rinse.svg
     :target: https://travis-ci.org/tysonclugg/rinse
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/tysonclugg/rinse/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/tysonclugg/rinse?branch=master
+.. image:: https://img.shields.io/coveralls/tysonclugg/rinse.svg
+   :target: https://coveralls.io/github/tysonclugg/rinse
    :alt: Coverage
 
 Rinse_ works with both Python 2 and Python 3.  Continuous integration 
