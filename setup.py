@@ -18,6 +18,7 @@ setup(
         'lxml',
         'requests',
     ],
+    tests_require=['mock'],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 2",
