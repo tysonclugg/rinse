@@ -169,3 +169,15 @@ def recursive_dict(element):
             map(recursive_dict, element)
         ) or element.text
     )
+
+
+class cached_property(object):
+    def __init__(self, func):
+        self.func = func
+        self.__doc__ = getattr(func, '__doc__')
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        result = instance.__dict__[self.func.__name__] = self.func(instance)
+        return result
