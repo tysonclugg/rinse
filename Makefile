@@ -1,41 +1,42 @@
-SOURCES := \
-	rinse/__init__.py \
-	rinse/client.py \
-	rinse/message.py \
-	rinse/response.py \
-	rinse/util.py \
-	rinse/wsa.py \
-	rinse/wsdl.py \
-	rinse/wsse.py \
-	rinse/xsd.py
+NAME := $(shell python setup.py --name)
+VERSION := $(shell python setup.py --version)
 
-DOCS := \
-	README.rst \
-	docs/index.rst \
-	docs/rinse.rst \
-	docs/rinse.client.rst \
-	docs/rinse.message.rst \
-	docs/rinse.response.rst \
-	docs/rinse.util.rst \
-	docs/rinse.wsa.rst \
-	docs/rinse.wsdl.rst \
-	docs/rinse.wsse.rst \
-	docs/rinse.xsd.rst
+SDIST := dist/${NAME}-${VERSION}.tar.gz
+WHEEL := dist/${NAME}-${VERSION}-py2.py3-none-any.whl
 
-.PHONY: all test clean clean-docs
+.PHONY: all test clean clean-docs upload-docs upload-pypi dist docs
 
-all: docs
+all: docs dist
 
 test:
-	python setup.py test
+	tox
 
-clean: clean-docs
+clean: clean-docs clean-sdist clean-wheel
 
 clean-docs:
-	rm -rf docs/_build/
+	$(MAKE) -C docs/ clean
 
-docs: docs/_build/
+clean-sdist:
+	rm -f "${SDIST}"
 
-docs/_build/: ${DOCS} ${SOURCES} docs/conf.py setup.py
-	rm -rf docs/_build/
-	cd docs && $(MAKE) html doctest
+clean-wheel:
+	rm -f "${WHEEL}"
+
+docs:
+	$(MAKE) -C docs/ clean html
+
+${SDIST}:
+	python setup.py sdist
+
+${WHEEL}:
+	python setup.py bdist_wheel
+
+dist: test ${SDIST} ${WHEEL}
+
+upload: upload-pypi upload-docs
+
+upload-pypi: ${SDIST} ${WHEEL}
+	twine upload "${WHEEL}" "${SDIST}"
+
+upload-docs: docs/_build/
+	python setup.py upload_sphinx --upload-dir="$<html"

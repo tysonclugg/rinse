@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='rinse',
@@ -10,7 +10,8 @@ setup(
     author_email='tyson@clugg.net',
     url='https://rinse.readthedocs.org/en/latest/',
     license='MIT',
-    packages=['rinse'],
+    packages=find_packages(),
+    include_package_data=True,
     zip_safe=False,
     test_suite='rinse.tests',
     install_requires=[
