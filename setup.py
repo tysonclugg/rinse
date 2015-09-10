@@ -11,6 +11,7 @@ setup(
     url='https://rinse.readthedocs.org/en/latest/',
     license='MIT',
     packages=['rinse'],
+    include_package_data=True,
     zip_safe=False,
     test_suite='rinse.tests',
     install_requires=[
