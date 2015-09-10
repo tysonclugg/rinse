@@ -39,11 +39,11 @@ class TestRinseClient(unittest.TestCase):
         """Test that SOAP action is passed on to SoapMessage.request()."""
         msg = SoapMessage(etree.Element('test'))
         msg.request = MagicMock()
-        with patch('requests.Session') as mock:
+        with patch('requests.Session'):
             client = SoapClient('http://example.com')
-            response = client(msg, 'testaction', build_response=lambda r: r)
+            client(msg, 'testaction', build_response=lambda r: r)
             msg.request.assert_called_once_with('http://example.com',
-                                                 'testaction')
+                                                'testaction')
 
     def test_soap_action_debug(self):
         msg = SoapMessage(etree.Element('test'))
@@ -72,9 +72,9 @@ class TestRinseClient(unittest.TestCase):
            when no action given."""
         msg = SoapMessage(etree.Element('test'))
         msg.request = MagicMock()
-        with patch('requests.Session') as mock:
+        with patch('requests.Session'):
             client = SoapClient('http://example.com')
-            response = client(msg, build_response=lambda r: r)
+            client(msg, build_response=lambda r: r)
             msg.request.assert_called_once_with('http://example.com', '')
 
 
