@@ -37,7 +37,7 @@ class SoapClient(object):
                     in sorted(request.headers.items())
                 )
             )
-            print(request.content)
+            print(request.body.decode('utf-8'))
 
         # perform HTTP(s) POST
         resp = self._session.send(request)
