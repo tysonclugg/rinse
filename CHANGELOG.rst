@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.4.0
+-----
+* Use ``@cached_property`` to simplify property code.
+* Fix ``AttributeError`` when debugging.
+* Include missing XSD files in wheel distributions.
+* Ensure XSD files exist in distributed files via tox test suite 
+  options.
+
 0.3.0
 -----
 * Add 'SOAPAction' header to requests.

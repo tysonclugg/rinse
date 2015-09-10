@@ -2,15 +2,13 @@
 from __future__ import print_function
 import requests
 from rinse import ENVELOPE_XSD
-from rinse.util import SCHEMA
+from rinse.util import SCHEMA, cached_property
 from rinse.response import RinseResponse
 
 
 class SoapClient(object):
 
     """Rinse SOAP client."""
-
-    __session = None
 
     def __init__(self, url, debug=False, **kwargs):
         """Set base attributes."""
@@ -20,17 +18,10 @@ class SoapClient(object):
         self.operations = {}
         self.soap_schema = SCHEMA[ENVELOPE_XSD]
 
-    @property
+    @cached_property
     def _session(self):
         """Cached instance of requests.Session."""
-        if self.__session is None:
-            self.__session = requests.Session()
-        return self.__session
-
-    @_session.setter
-    def _session(self, session):
-        """Allow injecting your own instance of requests.Session."""
-        self.__session = session
+        return requests.Session()
 
     def __call__(self, msg, action="", build_response=RinseResponse,
                  debug=False):

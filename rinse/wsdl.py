@@ -1,6 +1,8 @@
 """Rinse SOAP library: module providing WSDL functions."""
 from lxml import etree
-from rinse.util import safe_parse_path, safe_parse_url, element_as_tree
+from rinse.util import (
+    safe_parse_path, safe_parse_url, element_as_tree, cached_property,
+)
 from rinse.xsd import XSDValidator, NS_XSD
 
 NS_WSDL = 'http://schemas.xmlsoap.org/wsdl/'
@@ -31,22 +33,18 @@ class WSDL(object):
         """WSDL init."""
         self.root = wsdl_root
 
-    @property
+    @cached_property
     def schema(self):
         """Return schema element (used for XSD validation)."""
-        if self._schema is None:
-            schema_el = self.root.xpath(
-                '/wsdl:definitions/wsdl:types/xsd:schema', namespaces=NS_MAP,
-            )[0]
-            self._schema = element_as_tree(schema_el)
-        return self._schema
+        schema_el = self.root.xpath(
+            '/wsdl:definitions/wsdl:types/xsd:schema', namespaces=NS_MAP,
+        )[0]
+        return element_as_tree(schema_el)
 
-    @property
+    @cached_property
     def xsd_validator(self):
         """Extract XML Schema Definition (XSD) element tree."""
-        if self._xsd_validator is None:
-            self._xsd_validator = XSDValidator(self.schema)
-        return self._xsd_validator
+        return XSDValidator(self.schema)
 
     def is_valid(self, soapmsg):
         """Return True if SOAP message body validates against WSDL schema."""

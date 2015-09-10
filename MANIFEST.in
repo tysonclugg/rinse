@@ -1,10 +1,10 @@
 include LICENSE
-include Makefile
 include *.rst
-include docs/*.rst
-include docs/conf.py
-include docs/make.bat
-include docs/Makefile
-include docs/_static/*
-include docs/_templates/*
+include *.sh
+include *.txt
+include Makefile
+recursive-include docs *.bat
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
 recursive-include rinse *.xsd
