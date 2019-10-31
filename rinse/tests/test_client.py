@@ -32,6 +32,7 @@ class TestSoapMessage(unittest.TestCase):
         msg = SoapMessage(etree.Element('test'))
         req = msg.request('http://example.com', None)
         self.assertTrue('SOAPAction' not in req.headers)
+        self.assertTrue(msg.etree())
 
 
 class TestRinseClient(unittest.TestCase):
@@ -81,19 +82,19 @@ class TestRinseClient(unittest.TestCase):
         msg = SoapMessage(etree.Element('test'))
         msg.request = MagicMock()
         client = SoapClient('http://example.com', timeout=1)
-        assert client.timeout == 1
+        self.assertEqual(client.timeout, 1)
 
         with patch('requests.Session'):
             client(msg, 'testaction', build_response=lambda r: r)
-            assert client._session.send.call_args[1]['timeout'] == 1
+            self.assertEqual(client._session.send.call_args[1]['timeout'], 1)
 
         with patch('requests.Session'):
             client(msg, 'testaction', build_response=lambda r: r, timeout=2)
-            assert client._session.send.call_args[1]['timeout'] == 2
+            self.assertEqual(client._session.send.call_args[1]['timeout'], 2)
 
         with patch('requests.Session'):
             client(msg, 'testaction', build_response=lambda r: r, timeout=None)
-            assert client._session.send.call_args[1]['timeout'] is None
+            self.assertEqual(client._session.send.call_args[1]['timeout'], None)
 
 
 if __name__ == '__main__':
