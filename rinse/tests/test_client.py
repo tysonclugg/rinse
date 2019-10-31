@@ -32,7 +32,6 @@ class TestSoapMessage(unittest.TestCase):
         msg = SoapMessage(etree.Element('test'))
         req = msg.request('http://example.com', None)
         self.assertTrue('SOAPAction' not in req.headers)
-        self.assertTrue(msg.etree())
 
 
 class TestRinseClient(unittest.TestCase):
