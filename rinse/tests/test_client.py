@@ -77,6 +77,24 @@ class TestRinseClient(unittest.TestCase):
             client(msg, build_response=lambda r: r)
             msg.request.assert_called_once_with('http://example.com', '')
 
+    def test_timeout(self):
+        msg = SoapMessage(etree.Element('test'))
+        msg.request = MagicMock()
+        client = SoapClient('http://example.com', timeout=1)
+        assert client.timeout == 1
+
+        with patch('requests.Session'):
+            client(msg, 'testaction', build_response=lambda r: r)
+            assert client._session.send.call_args[1]['timeout'] == 1
+
+        with patch('requests.Session'):
+            client(msg, 'testaction', build_response=lambda r: r, timeout=2)
+            assert client._session.send.call_args[1]['timeout'] == 2
+
+        with patch('requests.Session'):
+            client(msg, 'testaction', build_response=lambda r: r, timeout=None)
+            assert client._session.send.call_args[1]['timeout'] is None
+
 
 if __name__ == '__main__':
     unittest.main()

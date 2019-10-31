@@ -14,6 +14,7 @@ class SoapClient(object):
         """Set base attributes."""
         self.url = url
         self.debug = debug
+        self.timeout = kwargs.pop('timeout', None)
         self.kwargs = kwargs
         self.operations = {}
         self.soap_schema = SCHEMA[ENVELOPE_XSD]
@@ -24,7 +25,7 @@ class SoapClient(object):
         return requests.Session()
 
     def __call__(self, msg, action="", build_response=RinseResponse,
-                 debug=False):
+                 debug=False, **kwargs):
         """Post 'msg' to remote service."""
         # generate HTTP request from msg
         request = msg.request(self.url, action).prepare()
@@ -40,5 +41,5 @@ class SoapClient(object):
             print(request.body.decode('utf-8'))
 
         # perform HTTP(s) POST
-        resp = self._session.send(request)
+        resp = self._session.send(request, timeout=kwargs.get('timeout', self.timeout))
         return build_response(resp)
