@@ -1,12 +1,17 @@
 Changelog
 =========
 
+0.5.0
+-----
+* Allow passing a ``timeout`` argument to the client.
+* Add Python 3.6, 3.7 and 3.8 to test builds.
+
 0.4.0
 -----
 * Use ``@cached_property`` to simplify property code.
 * Fix ``AttributeError`` when debugging.
 * Include missing XSD files in wheel distributions.
-* Ensure XSD files exist in distributed files via tox test suite 
+* Ensure XSD files exist in distributed files via tox test suite
   options.
 
 0.3.0

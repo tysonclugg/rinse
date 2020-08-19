@@ -35,7 +35,7 @@ CLASSIFIERS = [
 
 setup(
     name='rinse',
-    version='0.4.0',
+    version='0.5.0',
     description='SOAP client built with lxml and requests.',
     long_description=open('README.rst').read(),
     author='Tyson Clugg',
